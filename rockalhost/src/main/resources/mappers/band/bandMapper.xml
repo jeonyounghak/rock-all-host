@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="band">
+	<select id="mylist"	resultType="com.example.rockalhost.model.band.dto.MybandDTO">
+		select b.b_name,m.nickName, p.po_name, m.positionmain, m.career, g.gra_name
+        FROM member m, position p, band b, grade g
+        where b.b_idx=m.myband and p.idx=m.positionmain and g.idx=m.mygrade and m.myband=#{band}
+	</select>	
+	<insert id="apply">
+		insert into band
+		(b_idx,b_name,b_genre,b_num,b_leaderNick,b_area,description,b_logo) values
+		((SELECT NVL(MAX(b_idx)+1,1)
+		FROM band), #{b_name},#{b_genre},#{b_num}, #{b_leaderNick},#{b_area},#{description},#{b_logo})
+	</insert>	
+	<update id="userapply">
+		update member set myGrade=3, myBand=(SELECT b_idx FROM band where b_leaderNick = #{b_leaderNick})		
+        where nickName=#{b_leaderNick}
+    </update>
+    <select id="leaderlist"	resultType="com.example.rockalhost.model.band.dto.MybandDTO">
+		select b.b_name,m.nickName, p.po_name, m.positionmain, m.career, g.gra_name
+        FROM member m, position p, band b, grade g
+        where b.b_idx=m.myband and p.idx=m.positionmain and g.idx=m.mygrade and m.myband=#{band}
+	</select>
+	<select id="temperProfile" resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+  		select * from member
+ 		where nickName = #{nickName}
+ 	</select>
+ 	<update id="temperUpdate">
+ 		update member 
+        set career=#{career}, positionMain=#{positionMain}, positionSub=#{positionSub}
+        where nickName=#{nickName} 		
+	</update>
+	<update id="temperDelete">
+ 		update member 
+ 		set myGrade=1, myBand=null  
+        where nickname=#{nickName} 		
+	</update>	
+	<update id="mytemperDelete">
+ 		update member 
+ 		set myGrade=1, myBand=null  
+        where nickname=#{nickName} 		
+	</update>
+	<select id="mybandview"  
+		resultType="com.example.rockalhost.model.band.dto.AllbandViewDTO">
+		select b.b_idx, b.b_leaderNick, b.B_name, g.gn_name, b.B_num, q.ar_name, b.description, b.b_logo	
+        from band b,genre g, area q
+        where b.B_GENRE = g.idx and b.B_area = q.idx and b_idx=#{b_idx}
+	</select>	
+	<update id="mybandupdate">
+ 		update band 
+		set b_name=#{b_name}, b_genre=#{b_genre}, b_num=#{b_num}, b_area=#{b_area}, b_logo=#{b_logo}, description=#{description}
+		where b_leaderNick=#{b_leaderNick}	
+	</update>
+	<select id="memberview" resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+ 		 select * from member
+ 		 where nickName = #{nickName}
+	 </select>
+	<select id="joinIdCheck" resultType="int">
+  		select count(*) from band
+  		where b_name = #{b_name}
+ 	</select>
+ 	 <select id="bandCount" resultType="int" parameterType="int">
+  		select count(*) from band
+	 </select>
+	 
+	 <select id="getCheckNick" resultType="int">
+  		select count(*) from band 
+		where b_leaderNick = #{nickName}
+	 </select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

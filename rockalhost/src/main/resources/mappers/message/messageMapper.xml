@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="message">
+	<select id="messagelist" resultType="com.example.rockalhost.model.message.dto.MessageDTO">
+		select idx, sender, receiver, title, content, regdate
+		from message
+		where receiver = #{nickName}  and sendshow = 'y' order by idx desc
+		<!-- select idx,sender,receiver,title,content from message m, member b 
+			where m.receiver=b.nickName order by idx desc; -->
+	</select>
+	<select id="receiverlist" resultType="com.example.rockalhost.model.message.dto.MessageDTO">
+		select idx, sender, receiver, title, content, regdate
+		from message
+		where sender = #{nickName}  and reshow = 'y' order by idx desc		
+	</select>
+	<select id="messageview" resultType="com.example.rockalhost.model.message.dto.MessageDTO">
+		select * from message
+		where
+		idx=#{idx}
+	</select>
+	<update id="messageupdate">
+		update message 
+		set sendshow='n'
+		where idx=#{idx} 
+	</update>
+	<select id="messagewriter" resultType="com.example.rockalhost.model.message.dto.MessageDTO">
+		select sender
+		from message
+		where sender=#{nickName} 
+	</select>
+	<insert id="messageinsert">
+		insert into message
+		(idx,sender,receiver,title,content) values
+		((SELECT NVL(MAX(idx)+1,1)
+		FROM message), #{sender},#{receiver},#{title}, #{content})
+	</insert>
+	<insert id="messagereply">
+		insert into message
+		(idx,sender,receiver,title,content) values
+		((SELECT NVL(MAX(idx)+1,1)
+		FROM message), #{sender},#{receiver},#{title}, #{content})
+	</insert>
+	<select id="myList"	resultType="com.example.rockalhost.model.message.dto.MessageDTO">
+		select * from
+		message
+		where sender=#{nickName}
+	</select>
+	<select id="myview" resultType="com.example.rockalhost.model.message.dto.MessageDTO">
+		select * from message
+		where
+		idx=#{idx}
+	</select>
+	<update id="receiverupdate">
+		update message 
+		set reshow='n'
+		where idx=#{idx} 
+	</update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

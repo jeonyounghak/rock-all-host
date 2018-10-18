@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="seek">
+	<select id="list" resultType="com.example.rockalhost.model.seek.dto.SeekDTO">
+		select *
+		from (
+		    select rownum as rn, A.*
+		    from (
+				select s.idx,subject,writer,reg_date,(select count(*) from s_recommend where idx=s.idx and r_recommend='y') recommend, 
+				show, readcount, (select count(*) from s_reply where idx=s.idx) cnt
+				from seek s
+				<include refid="search" />
+				order by idx desc
+			) A
+		) where rn between #{start} and #{end}	
+	</select>
+	
+	<sql id="search">
+		<choose>
+			<when test="search_option != 'all' ">
+				where ${search_option} like #{keyword}			
+			</when>
+			<otherwise>
+				where  (writer like #{keyword} 
+				        or subject like #{keyword}
+				        or content like #{keyword} )			
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<select id="view" resultType="com.example.rockalhost.model.seek.dto.SeekDTO">
+		select * from seek
+		where idx = #{idx}
+	</select>
+	
+	<insert id="insert">
+		insert into seek
+      (type,idx,writer,subject,content,ip, re_position, r_area) 
+    values
+      ( 1,(select nvl(max(idx)+1,1) from seek)
+        ,#{writer},#{subject}
+        ,#{content},#{ip}, #{re_position}, #{r_area})		
+	</insert>
+	
+	<insert id="addAttach">
+		insert into attach (fullName, idx) values
+		(#{fullName}, seq_board.currval )
+	</insert> 
+	
+	<insert id="appl">
+		insert into s_appl (id, idx) values
+		(#{id}, #{idx})
+	</insert>
+	
+	<select id="check_list" resultType="com.example.rockalhost.model.member.dto.MemberDTO" >
+		SELECT m.id, email, name, nickName, birth, sex, hp, addr, 
+		positionMain, positionSub, career, myBand, myGrade
+		FROM member m, s_appl a
+		where m.id = a.id
+		and appr='n' 
+		and idx=#{idx}
+	</select>
+	
+	<select id="profile" resultType="com.example.rockalhost.model.seek.dto.ViewMemberDTO">
+		select (select b_name from band where b_leaderNick=#{writer}) myBand,
+		id,name,email,nickName,birth,sex,hp,addr,career,positionMain,positionSub,myGrade
+		from member 
+		where nickName=#{writer}
+	</select>
+	
+	<update id="appr">
+		update s_appl set appr='y' where id=#{id}
+	</update>
+	
+	<insert id="recommend">
+		insert into s_recommend (id,idx) values(#{writer},#{idx})
+	</insert>
+	
+	<select id="band_profile" resultType="com.example.rockalhost.model.band.dto.AllbandDTO">
+		select b_leaderNick, b_name, b_num, b_genre, b_area, descrition
+		from band
+		where b_leaderNick = #{writer}
+	</select>
+	
+	<select id="countArticle" resultType="int">
+		select count(*)
+		from seek	
+	</select>
+	
+	<select id="appl_check" resultType="String">
+		select id
+		from s_appl
+		where id = #{id} and idx = #{idx}
+	</select>
+	
+	<update id="readCount">
+		update seek set readCount=readCount+1
+		where idx=#{idx}
+	</update>
+	
+	<update id="update">
+		update seek set subject=#{subject}, content=#{content}, re_position=#{re_position}, re_num=#{re_num}, r_area=#{r_area}
+		where idx=#{idx}
+	</update>
+	
+	<update id="delete">
+		update seek set show='n'
+		where idx=#{idx}
+	</update>
+	
+	<select id="grade_check" resultType="int">
+		select myGrade
+		from member
+		where id=#{id}
+	</select>
+	
+	<select id="check_recommend" resultType="String">
+		select * from s_recommend where id=#{id} and idx=#{idx}
+	</select>
+	
+	<delete id="delete_recommend">
+		delete from s_recommend where id=#{id} and idx=#{idx}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

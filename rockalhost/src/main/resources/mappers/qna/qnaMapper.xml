@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="qnaBoard">
+
+	<select id="list" resultType="com.example.rockalhost.model.subBoard.dto.SubBoardDTO">
+		select * from ( 
+	    	select A.*, rownum as rn from ( 
+				SELECT num, pf_idx, writer, subject, reg_date, readcount, ref, re_step, 
+					re_level, content, ip, show 
+				FROM qnaBoard 
+				WHERE pf_idx = #{pf_idx}
+				order by ref desc, re_step
+			) A 
+		) where rn between #{start} and #{end}
+	</select>
+	
+	<update id="plusReadcount">
+		update qnaBoard set 
+		readcount = readcount+1 where num = #{num}
+	</update>
+	
+	<select id="view" resultType="com.example.rockalhost.model.subBoard.dto.SubBoardDTO">
+		SELECT * FROM qnaBoard 
+		WHERE num = #{num}
+	</select>
+	
+	<insert id="insert">
+		insert into qnaBoard
+			(num, pf_idx, writer, subject, passwd, ref, re_step, re_level, content, ip) 
+		values (
+			(select nvl(max(num)+1,1) from qnaBoard), #{pf_idx}, #{writer}, #{subject}, #{passwd}, 
+			(select nvl(max(num)+1,1) from qnaBoard), 1, 0, #{content}, #{ip})
+	</insert>
+	
+	<select id="passwdCheck" resultType="int">
+		select count(*) from qnaBoard 
+		where num = #{num} and passwd = #{passwd} 
+	</select>
+	
+	<update id="update" parameterType="com.example.rockalhost.model.subBoard.dto.SubBoardDTO">
+		update qnaBoard 
+		set subject=#{subject}, content=#{content}
+		, passwd=#{passwd}, ip=#{ip} 
+		where num=#{num}
+	</update>
+	
+	<update id="hidden">
+		update qnaBoard 
+		set show = 'n' 
+		where num = #{num}
+	</update>
+	
+	<insert id="reply">
+		insert into qnaBoard 
+			(num, writer, subject, passwd, ref, re_step, re_level, content, ip, pf_idx) 
+		values (
+			(select nvl(max(num)+1,1) from qnaBoard), #{writer}, #{subject}, #{passwd}, 
+			#{ref}, #{re_step}, #{re_level}, #{content}, #{ip}, #{pf_idx})
+	</insert>
+	
+	<select id="getCount" resultType="int">
+		select count(*) from qnaBoard 
+		WHERE pf_idx = #{pf_idx} AND show = 'y'
+	</select>
+	
+	
+	<select id="getBandQBCount" resultType="int">
+		select count(*) 
+		from qnaBoard q, performance pf 
+		WHERE 
+			(SELECT b_idx FROM performance p WHERE p.pf_idx = q.pf_idx) = #{b_idx} 
+			AND q.pf_idx = pf.pf_idx 
+			AND q.show = 'y' 
+			<choose>
+				<when test="search_option != 'searchAll'">
+					AND q.${search_option} like '%'||#{keyword}||'%' 
+				</when>
+				<otherwise>
+					AND (q.writer like '%'||#{keyword}||'%' or 
+					q.content like '%'||#{keyword}||'%' or q.subject like '%'||#{keyword}||'%') 
+				</otherwise>
+			</choose>
+	</select>
+	
+	<select id="qbList" resultType="com.example.rockalhost.model.subBoard.dto.SubBoardDTO">
+		select * from ( 
+	    	select A.*, rownum as rn from ( 
+				SELECT 
+					(SELECT pf_title FROM performance p WHERE p.pf_idx = q.pf_idx) pf_title,
+					num, pf_idx, writer, subject, reg_date, readcount, ref, re_step, 
+					re_level, content, ip, show 
+				FROM qnaBoard q
+				WHERE (SELECT b_idx FROM performance p WHERE p.pf_idx = q.pf_idx) = #{b_idx} 
+				AND show = 'y' 
+		     	<choose>
+					<when test="search_option != 'searchAll'">
+						AND q.${search_option} like '%'||#{keyword}||'%' 
+					</when>
+					<otherwise>
+						AND (q.writer like '%'||#{keyword}||'%' or 
+						q.content like '%'||#{keyword}||'%' or q.subject like '%'||#{keyword}||'%') 
+					</otherwise>
+				</choose>
+				order by ref desc, re_step
+			) A 
+		) where rn between #{start} and #{end}
+	</select>
+	
+	
+	
+	<!-- admin -->
+	
+	<select id="getAdminQBCount" resultType="int">
+		select count(*) 
+		from qnaBoard q, performance pf 
+		WHERE 
+			q.pf_idx = pf.pf_idx 
+			AND q.show = #{show} 
+			<choose>
+				<when test="search_option != 'searchAll'">
+					AND q.${search_option} like '%'||#{keyword}||'%' 
+				</when>
+				<otherwise>
+					AND (q.writer like '%'||#{keyword}||'%' or 
+					q.content like '%'||#{keyword}||'%' or q.subject like '%'||#{keyword}||'%') 
+				</otherwise>
+			</choose>
+	</select>
+	
+	<select id="adminQBList" resultType="com.example.rockalhost.model.subBoard.dto.SubBoardDTO">
+		select * from ( 
+	    	select A.*, rownum as rn from ( 
+				SELECT 
+					(SELECT pf_title FROM performance p WHERE p.pf_idx = q.pf_idx) pf_title,
+					num, pf_idx, writer, subject, reg_date, readcount, ref, re_step, 
+					re_level, content, ip, show 
+				FROM qnaBoard q
+				WHERE show = #{show} 
+		     	<choose>
+					<when test="search_option != 'searchAll'">
+						AND q.${search_option} like '%'||#{keyword}||'%' 
+					</when>
+					<otherwise>
+						AND (q.writer like '%'||#{keyword}||'%' or 
+						q.content like '%'||#{keyword}||'%' or q.subject like '%'||#{keyword}||'%') 
+					</otherwise>
+				</choose>
+				order by ref desc, re_step
+			) A 
+		) where rn between #{start} and #{end}
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

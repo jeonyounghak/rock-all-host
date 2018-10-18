@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="member">
+
+ <insert id="insert">
+   INSERT INTO member
+   (id, email, passwd, name, nickName, birth, sex, hp, addr, addrDt, zip, agreeAd, career, positionMain, positionSub) 
+   VALUES(
+    #{id}, #{email}, #{passwd}, #{name}, #{nickName}, #{birth}, #{sex}, #{hp}, #{addr}, #{addrDt}, #{zip}, #{agreeAd}, #{career}, #{positionMain}, #{positionSub} 
+   )
+ </insert>
+ 
+  <select id="loginTest" parameterType="com.example.rockalhost.model.member.dto.MemberDTO" 
+                         resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+  select * from member
+  where id = #{id} and withdrawal = 'n'
+ </select>
+ 
+<!--  <select id="login_check" parameterType="com.example.rockalhost.model.member.dto.MemberDTO"
+         resultType="String">
+  select name 
+  from member
+  where id = #{id} and passwd = #{passwd}
+ </select> -->
+ 
+ <select id="viewMember" resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+  select * from member
+  where id = #{id}
+ </select>
+ 
+ <select id="getMemberSession" resultType="com.example.rockalhost.model.member.dto.MemberSessionDTO">
+  SELECT m.id, m.name, m.nickName, b.b_name myBand, g.gra_name myGrade 
+	FROM member m, band b, grade g
+	WHERE m.myBand = b.b_idx and m.myGrade = g.idx and id = #{id} 
+ </select>
+ 
+ <update id="update">
+  update member
+  set passwd=#{passwd}, email=#{email}, name=#{name}, nickName=#{nickName}, birth=#{birth}, sex=#{sex}, hp=#{hp}, 
+  addr=#{addr}, addrDt=#{addrDt}, zip=#{zip}, career=#{career}, positionMain=#{positionMain}, positionSub=#{positionSub}, withdrawal=#{withdrawal}
+  where id = #{id}
+ </update>
+ 
+ <select id="checkPasswd" resultType="int">
+   select count(*) from member
+   where id = #{id} and passwd = #{passwd}
+ </select>
+ 
+ <delete id="delete">
+  delete from member
+  where id = #{id}
+ </delete>
+ 
+ <select id="nickCheck" resultType="int">
+  select count(*) from member
+  where nickName = #{nickName}
+ </select>
+ 
+ <select id="joinNickCheck" resultType="int">
+  select count(*) from member
+  where nickName = #{nickName}
+ </select>
+ 
+ <select id="joinIdCheck" resultType="int">
+  select count(*) from member
+  where id = #{id}
+ </select>
+ 
+ <select id="idFind" resultType="String">
+  select id from member
+  where name = #{name} and email = #{email}
+ </select>
+ 
+ <select id="passwdFind" resultType="String">
+  select passwd from member
+  where id = #{id} and name = #{name} and email = #{email}
+ </select>
+ 
+ <select id="passwdUpdate">
+  update member
+  set passwd = #{passwd}
+  where id = #{id}
+ </select>
+ 
+ <select id="list" resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+  select * from (
+   select A.*, rownum as rn from(
+   
+     select * from member
+     where withdrawal = 'n'
+     order by join_date desc
+   
+   )A
+  ) where rn between #{start} and #{end}
+ </select>
+ 
+ <select id="count" resultType="int" parameterType="int">
+  select count(*) from member
+ </select>
+ 
+ <update id="withdrawal">
+  update member
+  set withdrawal = 'y'
+  where id = #{id}
+ </update>
+
+ <select id="memberCount" parameterType="int" resultType="int">
+  select count(*) from member
+  where withdrawal = 'n'
+ </select>
+ 
+ <select id="withdrawalCount" parameterType="int" resultType="int">
+  select count(*) from member
+  where withdrawal = 'y' 
+ </select>
+
+</mapper>

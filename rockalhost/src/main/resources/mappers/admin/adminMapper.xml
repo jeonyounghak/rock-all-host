@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="admin">
+	<select id="login_check" parameterType="com.example.rockalhost.model.admin.dto.AdminDTO" resultType="String">
+		select name 
+		from admin 
+		where id = #{id} and passwd = #{passwd}
+	</select>
+	
+	<select id="viewMember" resultType="com.example.rockalhost.model.admin.dto.AdminDTO">
+		select * from admin 
+		where id = #{id}
+	</select>
+	
+	<!-- member -->
+	
+	<select id="list"
+		resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+		select * from member
+		where withdrawal = 'n'
+	</select>
+
+	<select id="withdrawalList" 
+	    resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+        select * from (
+        select A.*, rownum as rn from(
+        
+        select * from member
+        where withdrawal = 'y'
+        order by join_date desc
+        )A
+       ) where rn between #{start} and #{end}
+	</select>
+	
+	<update id="adminUpdateMember">
+	     update member
+         set email=#{email}, name=#{name}, nickName=#{nickName}, birth=#{birth}, sex=#{sex}, hp=#{hp}, 
+         addr=#{addr}, addrDt=#{addrDt}, zip=#{zip}, career=#{career}, positionMain=#{positionMain}, 
+         positionSub=#{positionSub}, myGrade = #{myGrade}, withdrawal = #{withdrawal}
+         where id = #{id}
+	</update>
+	
+	<update id="onclickRestore" parameterType="com.example.rockalhost.model.member.dto.MemberDTO">
+	  update member
+	  set withdrawal = 'n'
+	  where id = #{id}
+	</update>
+	
+	<select id="searchList"
+	resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+	  select * from member
+	  where ${search_option} like #{keyword} and withdrawal = 'n'
+	</select>
+	
+	<select id="searchAllList"
+	resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+	  select * from member
+	  where id like #{keyword} or
+	        nickName like #{keyword} or
+	        name like #{keyword} and withdrawal = 'n'
+	</select>
+	
+	<select id="withdrawalSearchList"
+	resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+	  select * from member
+	  where ${search_option} like #{keyword} and withdrawal = 'y'
+	</select>
+	
+	<select id="withdrawalAllList"
+	resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+	  select * from member
+	  where id like #{keyword} or
+	        nickName like #{keyword} or
+	        name like #{keyword} and withdrawal = 'y'
+	</select>
+	
+	
+	
+	<!-- band -->
+	
+	
+ 	<select id="bandList"
+		resultType="com.example.rockalhost.model.band.dto.AllbandViewDTO">
+		SELECT b.B_idx, b.B_name, g.gn_name, b.B_num,
+		b.B_leadernick, q.ar_name,
+		b.B_logo, b.found_date
+		from band b,genre g,
+		area q
+		where b.B_GENRE = g.idx and b.B_area = q.idx and b.show ='y' and approval = 'y'
+	</select>
+	
+	<select id="adminband" resultType="com.example.rockalhost.model.member.dto.MemberDTO">
+  		select * from member
+ 		where myBand = #{myBand} and approval = 'y'
+ 	</select>
+ 	
+ 	<update id="adminBandDelete"> 	
+ 		update member set mygrade=1, myband=null
+    	where myBand=#{myBand} 
+	</update> 
+	
+	<update id="adminBandShow"> 	
+ 		update band set show='n'
+		where b_idx=#{myBand}
+	</update>
+	
+	<select id="applylist"
+		resultType="com.example.rockalhost.model.band.dto.AllbandViewDTO">
+		SELECT b.B_idx, b.B_name, g.gn_name, b.B_num,
+		b.B_leaderNick, q.ar_name,
+		b.B_logo, b.found_date
+		from band b,genre g,
+		area q
+		where b.B_GENRE = g.idx and b.B_area = q.idx and approval='n'
+	</select>
+	
+	<select id="applyshow"  
+		resultType="com.example.rockalhost.model.band.dto.AllbandViewDTO">
+		select b.b_leaderNick, b.B_name, g.gn_name, b.B_num, q.ar_name, b.description, b.b_logo	
+        from band b,genre g, area q
+        where b.B_GENRE = g.idx and b.B_area = q.idx and b_leadernick=#{nickName}
+	</select>
+		
+	<update id="adminapply"> 	
+ 		update band set APPROVAL='y'
+    	where b_leaderNick=#{b_leaderNick}
+	</update>
+	
+	<select id="bandsearchList"
+	resultType="com.example.rockalhost.model.band.dto.AllbandViewDTO">
+	  select * from band
+	  where ${search_option} like #{keyword} and show = 'y' and approval = 'y'
+	</select>
+	
+	<select id="bandsearchAllList"
+	resultType="com.example.rockalhost.model.band.dto.AllbandViewDTO">
+	  select * from band
+	  where b_name like #{keyword} or
+	        b_genre like #{keyword} and show = 'y' and approval = 'y'
+	</select>
+	
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

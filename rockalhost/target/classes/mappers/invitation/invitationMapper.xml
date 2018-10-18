@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="invitation">
+	<insert id="insert" parameterType="com.example.rockalhost.model.invitation.dto.InvitationDTO">
+		INSERT INTO invitation
+    		(iv_idx, user_id, pf_idx, count) 
+		VALUES(
+   			(SELECT NVL(MAX(iv_idx)+1,1) FROM invitation), #{user_id}, #{pf_idx}, #{count})
+	</insert>
+	
+	<select id="list" resultType="com.example.rockalhost.model.invitation.dto.InvitationDTO">
+		SELECT iv.iv_idx, iv.user_id, iv.pf_idx, iv.count, iv.issue, iv.apply_date, 
+			pf.pf_title,
+    		(SELECT b_name FROM band WHERE band.b_idx = pf.b_idx) b_name,
+    		pf.pf_location pf_location,
+    		pf.pf_date,
+    		pf.pf_time
+		FROM invitation iv, performance pf 
+		WHERE user_id = #{id} AND iv.pf_idx = pf.pf_idx 
+		order by iv_idx desc
+	</select>
+	
+	<select id="doubleCheckCount" resultType="int">
+		SELECT count(*)  
+		FROM invitation 
+		WHERE user_id=#{user_id} AND pf_idx=#{pf_idx}
+	</select>
+		
+	<delete id="delete">
+		delete from invitation 
+		where iv_idx = #{iv_idx}
+	</delete>
+	
+	<select id="view" resultType="com.example.rockalhost.model.invitation.dto.InvitationDTO">
+		SELECT iv.iv_idx, iv.user_id, iv.pf_idx, iv.count, iv.issue, iv.apply_date, pf.pf_title, 
+    		(SELECT b_name FROM band WHERE band.b_idx = pf.b_idx) b_name,
+			pf.pf_location pf_location,
+			pf.pf_date,
+			pf.pf_time
+		FROM invitation iv, performance pf 
+		WHERE user_id = #{id} AND iv.pf_idx = pf.pf_idx 
+		order by iv_idx desc
+	</select>
+	
+	<update id="issued" parameterType="int">
+		update invitation set 
+			issue = 'y' 
+		where iv_idx = #{iv_idx}
+	</update>
+	
+	<select id="getIv_idxList" resultType="com.example.rockalhost.model.invitation.dto.InvitationDTO">
+		SELECT iv_idx 
+		FROM invitation 
+		WHERE pf_idx=#{pf_idx}
+	</select>
+	
+	<delete id="deleteAll">
+		delete from invitation 
+		where iv_idx = #{iv_idx}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

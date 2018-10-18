@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="boardComment">
+	<select id="list" resultType="com.example.rockalhost.model.board.dto.BoardCommentDTO">
+		select * from board_comment 
+		where board_num = #{num} 
+		order by comment_num
+	</select>
+	
+	<insert id="insert">
+		insert into board_comment (comment_num,board_num,writer,content,passwd) 
+		values ((select nvl(max(comment_num)+1,1) from board_comment) 
+		, #{board_num}, #{writer}, #{content}, #{passwd})
+	</insert>
+	
+	<delete id="delete" parameterType="int">
+		delete from board_comment 
+		where comment_num = #{comment_num}
+	</delete>
+	
+	<select id="view" resultType="com.example.rockalhost.model.board.dto.BoardCommentDTO">
+		select * from board_comment 
+		where comment_num = #{comment_num}
+	</select>
+	
+	<select id="passwdCheck" resultType="int">
+		select count(*) from board_comment 
+		where comment_num = #{comment_num} and passwd = #{passwd} 
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

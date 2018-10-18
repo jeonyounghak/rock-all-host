@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="chart">
+	<select id="getChartGenre" resultType="com.example.rockalhost.model.chart.dto.ChartDTO">
+		SELECT (SELECT gn_name FROM genre WHERE genre.idx = pf.gn_idx) c_name, COUNT(*) c_count 
+		from performance pf, genre g 
+		where pf.gn_idx = g.idx 
+        GROUP BY gn_idx
+	</select>
+	
+	<select id="getChartArea" resultType="com.example.rockalhost.model.chart.dto.ChartDTO">
+		SELECT (SELECT ar_name FROM area WHERE area.idx = pf.ar_idx) c_name, COUNT(*) c_count 
+		from performance pf, area ar 
+		where pf.ar_idx = ar.idx 
+        GROUP BY ar_idx
+	</select>
+	
+	<select id="getChartBand" resultType="com.example.rockalhost.model.chart.dto.ChartDTO">
+		SELECT (SELECT b_name FROM band WHERE band.b_idx = pf.b_idx) c_name, COUNT(*) c_count 
+		from performance pf, band b 
+		where pf.b_idx = b.b_idx 
+        GROUP BY pf.b_idx
+	</select>
+	
+	<select id="getChartSex" resultType="com.example.rockalhost.model.chart.dto.ChartDTO">
+		SELECT sex c_name, count(sex) c_count 
+		from member 
+		GROUP BY sex
+	</select>
+	
+	<select id="getChartAge" resultType="com.example.rockalhost.model.chart.dto.ChartDTO">
+		select SUBSTR((TO_CHAR(SYSDATE, 'YYYY')-(TO_CHAR(birth,'YYYY'))+1), 1,1)*10 c_name, COUNT(*) c_count 
+		from member 
+		GROUP BY SUBSTR((TO_CHAR(SYSDATE, 'YYYY')-(TO_CHAR(birth,'YYYY'))+1), 1,1)*10
+	</select>
+	
+	<select id="getChartPosition" resultType="com.example.rockalhost.model.chart.dto.ChartDTO">
+		SELECT (SELECT po_name FROM position WHERE position.idx = m.positionMain) c_name, COUNT(*) c_count 
+		from member m, position p 
+		where m.positionMain = p.idx 
+		GROUP BY m.positionMain
+	</select>
+	
+	<select id="getChartB_area" resultType="com.example.rockalhost.model.chart.dto.ChartDTO">
+		SELECT (SELECT ar_name FROM area WHERE area.idx = b.b_area) c_name, COUNT(*) c_count 
+		from band b, area ar 
+		where b.b_area = ar.idx 
+		GROUP BY b_area
+	</select>
+	
+	<select id="getChartB_genre" resultType="com.example.rockalhost.model.chart.dto.ChartDTO">
+		SELECT (SELECT gn_name FROM genre WHERE genre.idx = b.b_genre) c_name, COUNT(*) c_count 
+		from band b, genre g 
+		where b.b_genre = g.idx 
+		GROUP BY b_genre
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

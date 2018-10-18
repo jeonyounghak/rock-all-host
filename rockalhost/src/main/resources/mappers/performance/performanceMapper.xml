@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="performance">
+	<select id="list" resultType="com.example.rockalhost.model.performance.dto.PerformanceViewDTO">
+		select * from ( 
+	    	select A.*, rownum as rn from ( 
+	    		
+				SELECT pf_idx, pf.writer, pf_title, g.gn_name, pf_seats, b.b_name, a.ar_name, pf_runningTime, 
+					pf_location, pf.content, pf_date, pf_time, pf_img, pf.show, recommend, readcount, reg_date, remainder, 
+					(SELECT ROUND(avg(score), 1) 
+                    	FROM reviewBoard r
+                    WHERE r.pf_idx = pf.pf_idx AND r.show = 'y') score 
+				from performance pf, genre g, area a, band b 
+				where pf.gn_idx = g.idx and pf.ar_idx = a.idx and  pf.b_idx = b.b_idx 
+				
+				<choose>
+					<when test="search_option != 'searchAll'">
+						and ${search_option} like '%'||#{keyword}||'%' 
+					</when>
+					<otherwise>
+						and (pf_title like '%'||#{keyword}||'%' or pf_location like 
+						'%'||#{keyword}||'%' or content like '%'||#{keyword}||'%') 
+					</otherwise>
+				</choose>
+				
+				order by pf_date desc
+			) A 
+		) where rn between #{start} and #{end}
+	</select>
+	
+	<select id="view" resultType="com.example.rockalhost.model.performance.dto.PerformanceViewDTO">
+		SELECT pf_idx, pf.writer, pf_title, g.gn_name, pf_seats, b.b_name, a.ar_name, pf_runningTime, 
+			pf_location, pf.content, pf_date, pf_time, pf_img, remainder, 
+			(SELECT ROUND(avg(score), 1) 
+                    FROM reviewBoard r
+                    WHERE r.pf_idx = pf.pf_idx AND r.show = 'y') score  
+			from performance pf, genre g, area a, band b 
+		where pf.gn_idx = g.idx and pf.ar_idx = a.idx and  pf.b_idx = b.b_idx 
+			and pf_idx = #{pf_idx}
+	</select>
+	
+	<insert id="insert" parameterType="com.example.rockalhost.model.performance.dto.PerformanceDTO">
+		INSERT INTO performance
+    		(pf_idx, writer, pf_title, gn_idx, pf_seats, b_idx, ar_idx, pf_runningTime, pf_location, content, 
+    		pf_img, pf_date, pf_time, remainder) 
+		VALUES(
+   			(SELECT NVL(MAX(pf_idx)+1,1) FROM performance), #{writer}, #{pf_title}, #{gn_idx}, #{pf_seats}, #{b_idx}, 
+   			#{ar_idx}, #{pf_runningTime}, #{pf_location}, #{content}, #{pf_img}, #{pf_date}, #{pf_time}, #{pf_seats})
+	</insert>
+	
+	<update id="plusReadcount">
+		update performance set 
+			readcount = readcount+1 
+		where pf_idx = #{pf_idx}
+	</update>
+	
+	<update id="update" parameterType="com.example.rockalhost.model.performance.dto.PerformanceDTO">
+		update performance set 
+			pf_title=#{pf_title}, gn_idx=#{gn_idx}, pf_seats=#{pf_seats}, ar_idx=#{ar_idx}, pf_runningTime=#{pf_runningTime}, 
+			pf_location=#{pf_location}, content=#{content}, pf_img=#{pf_img}, pf_date=#{pf_date}, pf_time=#{pf_time}
+		where pf_idx=#{pf_idx}
+	</update>
+	
+	<delete id="delete">
+        delete from performance 
+		where pf_idx = #{pf_idx}
+	</delete>
+	
+	<update id="hide" parameterType="com.example.rockalhost.model.performance.dto.PerformanceDTO">
+		update performance set 
+			show = 'n' 
+		where pf_idx=#{pf_idx}
+	</update>
+	
+	<update id="upCountRemainder" parameterType="int">
+		update performance set 
+			remainder = remainder+#{count} 
+		where pf_idx = #{pf_idx}
+	</update>
+	
+	<update id="downCountRemainder" parameterType="int">
+		update performance set 
+			remainder = remainder-#{count} 
+		where pf_idx = #{pf_idx}
+	</update>
+	
+	<select id="getCount" resultType="int">
+		select count(*) 
+		from performance
+		where show = 'y'
+	</select>
+	
+	<select id="getBandIdx" resultType="int">
+		select b_idx 
+		from performance
+		where pf_idx = #{pf_idx}
+	</select>
+	
+	<select id="searchCount" resultType="int">
+		select count(*) from performance 
+		<choose>
+			<when test="search_option != 'searchAll'">
+				where ${search_option} like '%'||#{keyword}||'%' 
+				and show = 'y'
+			</when>
+			<otherwise>
+				where (pf_title like '%'||#{keyword}||'%' or 
+				content like '%'||#{keyword}||'%' or pf_location like '%'||#{keyword}||'%') 
+				and show = 'y'
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
